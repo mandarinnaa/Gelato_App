@@ -407,6 +407,122 @@
             </table>
         </div>
 
+        <!-- Ingresos Anuales y Meta Mensual -->
+        <div class="two-columns">
+            <div class="column">
+                <!-- Ingresos por Año -->
+                <div class="section no-break">
+                    <div class="section-title">Ingresos por Mes (Año Actual)</div>
+                    <div class="section-subtitle">Desglose mensual de ingresos totales</div>
+                    
+                    <table class="table table-compact">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%;">Mes</th>
+                                <th class="text-right" style="width: 50%;">Ingresos (MXN)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $totalYearRevenue = 0;
+                            @endphp
+                            @if(isset($revenueByYear) && count($revenueByYear) > 0)
+                                @foreach($revenueByYear as $monthData)
+                                    @php
+                                        $amount = $monthData['Ganancia'] ?? 0;
+                                        $totalYearRevenue += $amount;
+                                    @endphp
+                                    <tr>
+                                        <td class="font-bold">{{ $monthData['date'] ?? 'N/A' }}</td>
+                                        <td class="text-right {{ $amount > 0 ? 'text-blue' : 'text-gray' }}">
+                                            ${{ number_format($amount, 2) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="2" class="text-center text-gray" style="padding: 15px;">
+                                        No hay datos anuales disponibles
+                                    </td>
+                                </tr>
+                            @endif
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>TOTAL AÑO</td>
+                                <td class="text-right">${{ number_format($totalYearRevenue, 2) }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="column">
+                <!-- Progreso de Meta Mensual -->
+                <div class="section no-break">
+                    <div class="section-title">Progreso de Meta Mensual</div>
+                    <div class="section-subtitle">Objetivo: $50,000.00 MXN</div>
+                    
+                    @php
+                        $monthlyGoal = 50000;
+                        $currentRevenue = $stats['revenue'] ?? 0;
+                        $progressPercent = min(100, ($currentRevenue / $monthlyGoal) * 100);
+                        $remaining = max(0, $monthlyGoal - $currentRevenue);
+                    @endphp
+                    
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 4px; margin-top: 10px; border: 2px solid #cbd5e1;">
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
+                                Ingresos Actuales
+                            </div>
+                            <div style="font-size: 20px; font-weight: 700; color: #1e3a8a;">
+                                ${{ number_format($currentRevenue, 2) }}
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div style="background: #e0e7ff; height: 24px; border-radius: 4px; overflow: hidden; margin-bottom: 12px; border: 1px solid #cbd5e1;">
+                            <div style="background: #1e3a8a; height: 100%; width: {{ $progressPercent }}%; display: flex; align-items: center; justify-content: center; color: white; font-size: 9px; font-weight: 700;">
+                                {{ number_format($progressPercent, 1) }}%
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; font-size: 9px;">
+                            <div>
+                                <span style="color: #64748b; font-weight: 600;">Restante:</span>
+                                <span style="color: #1a1a1a; font-weight: 700; margin-left: 4px;">${{ number_format($remaining, 2) }}</span>
+                            </div>
+                            <div>
+                                <span style="color: #64748b; font-weight: 600;">Meta:</span>
+                                <span style="color: #1a1a1a; font-weight: 700; margin-left: 4px;">${{ number_format($monthlyGoal, 2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Stats -->
+                    <div style="margin-top: 12px; padding: 12px; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 4px;">
+                        <div style="margin-bottom: 8px;">
+                            <div style="font-size: 8px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 3px;">
+                                Promedio Diario Necesario
+                            </div>
+                            <div style="font-size: 14px; font-weight: 700; color: #1a1a1a;">
+                                @php
+                                    $daysInMonth = date('t');
+                                    $currentDay = date('j');
+                                    $daysRemaining = max(1, $daysInMonth - $currentDay);
+                                    $dailyAverage = $remaining / $daysRemaining;
+                                @endphp
+                                ${{ number_format($dailyAverage, 2) }}
+                            </div>
+                            <div style="font-size: 7px; color: #64748b; margin-top: 2px;">
+                                ({{ $daysRemaining }} días restantes)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Two Columns: Orders by Status + Top Products -->
         <div class="two-columns">
             <div class="column">

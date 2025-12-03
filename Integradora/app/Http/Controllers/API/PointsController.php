@@ -38,8 +38,8 @@ class PointsController extends Controller
             ->where('type', 'redeemed')
             ->sum('points'));
         
-        // Balance disponible
-        $available = max(0, $earned - $redeemed);
+        // Balance disponible (Usar columna directa de BD para coincidir con perfil)
+        $available = $user->points;
         
         // Puntos próximos a expirar (30 días)
         $expiringSoon = $user->pointTransactions()
@@ -120,11 +120,12 @@ public function calculateDiscount(Request $request)
     
     $user = $request->user();
     
-    if ($user->available_points < $validated['points']) {
+    // Usar columna points directa para coincidir con el perfil
+    if ($user->points < $validated['points']) {
         return response()->json([
             'success' => false,
             'message' => 'Puntos insuficientes',
-            'available_points' => $user->available_points
+            'available_points' => $user->points
         ], 400);
     }
     
@@ -143,7 +144,7 @@ public function calculateDiscount(Request $request)
             'discount_amount' => $discount,
             'original_total' => $validated['cart_total'],
             'new_total' => $newTotal,
-            'remaining_points' => $user->available_points - $validated['points'],
+            'remaining_points' => $user->points - $validated['points'],
             'note' => 'Descuento aplicado sobre total incluyendo envío'
         ]
     ], 200);
@@ -226,8 +227,8 @@ public function calculateDiscount(Request $request)
                 ],
                 'redemption_info' => [
                     'max_redemption' => 'Sin límite - puedes usar todos tus puntos disponibles',
-                    'available_points' => $user->available_points,
-                    'max_discount' => "Puedes obtener hasta $" . $user->available_points . " MXN de descuento"
+                    'available_points' => $user->points,
+                    'max_discount' => "Puedes obtener hasta $" . $user->points . " MXN de descuento"
                 ]
             ]
         ], 200);

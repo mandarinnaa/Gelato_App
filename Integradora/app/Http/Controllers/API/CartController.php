@@ -577,14 +577,28 @@ class CartController extends Controller
             $pointsToRedeem = $validated['points_to_redeem'] ?? 0;
             
             if ($pointsToRedeem > 0) {
+                // ✅ CRÍTICO: Refrescar usuario para obtener puntos actualizados
+                $user->refresh();
+                
+                // ✅ USAR COLUMNA POINTS DIRECTAMENTE (no el accessor available_points)
+                // El accessor calcula basado en transacciones que pueden estar desincronizadas
+                $userPoints = $user->points;
+                
+                Log::info('🔍 Verificando puntos disponibles', [
+                    'user_id' => $user->id,
+                    'points_column' => $userPoints,
+                    'requested_points' => $pointsToRedeem,
+                    'available_points_accessor' => $user->available_points
+                ]);
+                
                 // Verificar que el usuario tenga suficientes puntos
-                if ($user->available_points < $pointsToRedeem) {
+                if ($userPoints < $pointsToRedeem) {
                     DB::rollBack();
                     
                     return response()->json([
                         'success' => false,
                         'message' => 'Puntos insuficientes',
-                        'available_points' => $user->available_points,
+                        'available_points' => $userPoints,
                         'requested_points' => $pointsToRedeem
                     ], 400);
                 }

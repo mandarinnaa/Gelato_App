@@ -15,6 +15,55 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class DashboardController extends Controller
 {
     /**
+     * Get all dashboard data in a single request (OPTIMIZED)
+     */
+    public function getAllDashboardData(Request $request)
+    {
+        try {
+            $period = $request->get('period', 'month');
+            $month = $request->get('month');
+            $year = $request->get('year');
+            
+            // Calculate date range once
+            $dates = $this->getDateRange($period, $month, $year);
+            $startDate = $dates['start'];
+            $endDate = $dates['end'];
+
+            // Get previous period for comparisons
+            $prevDates = $this->getPreviousDateRange($period, $startDate, $month, $year);
+            $prevStartDate = $prevDates['start'];
+            $prevEndDate = $prevDates['end'];
+
+            // Fetch all data with optimized queries
+            $stats = $this->getStatsData($startDate, $endDate, $prevStartDate, $prevEndDate);
+            $revenueChart = $this->buildChartData($startDate, $endDate, $period);
+            $ordersByStatus = $this->getOrdersByStatusData($startDate, $endDate);
+            $topProducts = $this->getTopProductsData($startDate, $endDate);
+            $recentOrders = $this->getRecentOrdersData();
+            $revenueByYear = $this->getRevenueByYearData();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'stats' => $stats,
+                    'revenueChart' => $revenueChart,
+                    'ordersByStatus' => $ordersByStatus,
+                    'topProducts' => $topProducts,
+                    'recentOrders' => $recentOrders,
+                    'revenueByYear' => $revenueByYear
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error en getAllDashboardData: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener datos del dashboard',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get dashboard statistics with filters
      */
     public function getStats(Request $request)
@@ -382,63 +431,213 @@ class DashboardController extends Controller
     }
 
     public function generateReport(Request $request, $period)
-    {
-        try {
-            // Validar token si existe (opcional para mayor seguridad)
-            $token = $request->query('token');
-            if ($token) {
-                // Opcional: Validar que el token pertenece a un admin
-                $user = \Laravel\Sanctum\PersonalAccessToken::findToken($token)?->tokenable;
-                if (!$user || !in_array($user->role->name, ['superadmin', 'admin'])) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'No autorizado'
-                    ], 403);
-                }
+{
+    try {
+        // Validar token si existe (opcional para mayor seguridad)
+        $token = $request->query('token');
+        if ($token) {
+            // Opcional: Validar que el token pertenece a un admin
+            $user = \Laravel\Sanctum\PersonalAccessToken::findToken($token)?->tokenable;
+            if (!$user || !in_array($user->role->name, ['superadmin', 'admin'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No autorizado'
+                ], 403);
             }
-
-            Log::info('Generando reporte para período: ' . $period);
-
-            $startDate = $this->getStartDate($period);
-            $endDate = Carbon::now(config('app.timezone'));
-
-            // Obtener todos los datos necesarios
-            $stats = $this->getStatsForReport($startDate, $endDate);
-            $revenueData = $this->buildChartData($startDate, $endDate, $period);
-            $ordersByStatus = $this->getOrdersByStatusForReport($startDate, $endDate);
-            $topProducts = $this->getTopProductsForReport($startDate, $endDate);
-            $recentOrders = $this->getRecentOrdersForReport($startDate, $endDate);
-
-            $data = [
-                'period' => $period,
-                'startDate' => $startDate->format('d/m/Y'),
-                'endDate' => $endDate->format('d/m/Y'),
-                'stats' => $stats,
-                'revenueData' => $revenueData,
-                'ordersByStatus' => $ordersByStatus,
-                'topProducts' => $topProducts,
-                'recentOrders' => $recentOrders,
-                'business_name' => config('app.name', 'Pastelería Noemí'),
-            ];
-
-            Log::info('Datos preparados para PDF', ['data_keys' => array_keys($data)]);
-
-            $pdf = Pdf::loadView('reports.dashboard', $data);
-            $pdf->setPaper('letter', 'portrait');
-
-            $filename = 'reporte-' . $period . '-' . Carbon::now()->format('Y-m-d') . '.pdf';
-            
-            return $pdf->stream($filename);
-        } catch (\Exception $e) {
-            Log::error('Error al generar reporte PDF: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al generar el reporte',
-                'error' => $e->getMessage()
-            ], 500);
         }
+
+        Log::info('Generando reporte para período: ' . $period);
+
+        // Obtener mes y año de los parámetros de consulta
+        $month = $request->query('month');
+        $year = $request->query('year');
+
+        // Usar getDateRange que ya tiene la lógica correcta para day/week/month
+        $dates = $this->getDateRange($period, $month, $year);
+        $startDate = $dates['start'];
+        $endDate = $dates['end'];
+        
+        Log::info('Generando reporte con fechas', [
+            'period' => $period,
+            'month' => $month,
+            'year' => $year,
+            'startDate' => $startDate->toDateTimeString(),
+            'endDate' => $endDate->toDateTimeString()
+        ]);
+
+        // Obtener todos los datos necesarios
+        $stats = $this->getStatsForReport($startDate, $endDate);
+        $revenueData = $this->buildChartData($startDate, $endDate, $period);
+        $ordersByStatus = $this->getOrdersByStatusForReport($startDate, $endDate);
+        $topProducts = $this->getTopProductsForReport($startDate, $endDate);
+        $recentOrders = $this->getRecentOrdersForReport($startDate, $endDate);
+        $revenueByYear = $this->getRevenueByYearData();
+
+        $data = [
+            'period' => $period,
+            'startDate' => $startDate->format('d/m/Y'),
+            'endDate' => $endDate->format('d/m/Y'),
+            'stats' => $stats,
+            'revenueData' => $revenueData,
+            'ordersByStatus' => $ordersByStatus,
+            'topProducts' => $topProducts,
+            'recentOrders' => $recentOrders,
+            'revenueByYear' => $revenueByYear,
+            'business_name' => config('app.name', 'Pastelería Noemí'),
+        ];
+
+        Log::info('Datos preparados para PDF', ['data_keys' => array_keys($data)]);
+
+        $pdf = Pdf::loadView('reports.dashboard', $data);
+        $pdf->setPaper('letter', 'portrait');
+
+        $filename = 'reporte-' . $period . '-' . $startDate->format('Y-m-d') . '.pdf';
+        
+        return $pdf->stream($filename);
+    } catch (\Exception $e) {
+        Log::error('Error al generar reporte PDF: ' . $e->getMessage());
+        Log::error('Stack trace: ' . $e->getTraceAsString());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al generar el reporte',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+    // Optimized Helper Methods for Consolidated Endpoint
+
+    private function getStatsData($startDate, $endDate, $prevStartDate, $prevEndDate)
+    {
+        // Fetch current period data
+        $totalOrders = Order::whereBetween('created_at', [$startDate, $endDate])->count();
+        $totalSales = Sale::whereBetween('created_at', [$startDate, $endDate])->count();
+        $totalProducts = BaseProduct::where('available', true)->count();
+        
+        $ordersRevenue = Order::whereBetween('created_at', [$startDate, $endDate])->sum('total');
+        $salesRevenue = Sale::whereBetween('created_at', [$startDate, $endDate])->sum('total');
+        $totalRevenue = $ordersRevenue + $salesRevenue;
+
+        // Fetch previous period data for comparison
+        $prevOrdersRevenue = Order::whereBetween('created_at', [$prevStartDate, $prevEndDate])->sum('total');
+        $prevSalesRevenue = Sale::whereBetween('created_at', [$prevStartDate, $prevEndDate])->sum('total');
+        $prevTotalRevenue = $prevOrdersRevenue + $prevSalesRevenue;
+
+        $revenueChange = $prevTotalRevenue > 0 
+            ? (($totalRevenue - $prevTotalRevenue) / $prevTotalRevenue) * 100 
+            : 0;
+
+        $prevTotalOrders = Order::whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $ordersChange = $prevTotalOrders > 0 
+            ? (($totalOrders - $prevTotalOrders) / $prevTotalOrders) * 100 
+            : 0;
+
+        $prevTotalSales = Sale::whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $salesChange = $prevTotalSales > 0 
+            ? (($totalSales - $prevTotalSales) / $prevTotalSales) * 100 
+            : 0;
+
+        return [
+            'totalOrders' => $totalOrders,
+            'totalSales' => $totalSales,
+            'totalProducts' => $totalProducts,
+            'revenue' => round($totalRevenue, 2),
+            'ordersChange' => round($ordersChange, 1),
+            'salesChange' => round($salesChange, 1),
+            'revenueChange' => round($revenueChange, 1)
+        ];
+    }
+
+    private function getOrdersByStatusData($startDate, $endDate)
+    {
+        $orders = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->with('deliveryStatus:id,name')
+            ->get(['delivery_status_id']);
+
+        $statusCounts = [];
+        foreach ($orders as $order) {
+            $statusName = $order->deliveryStatus ? $order->deliveryStatus->name : 'Sin estado';
+            if (!isset($statusCounts[$statusName])) {
+                $statusCounts[$statusName] = 0;
+            }
+            $statusCounts[$statusName]++;
+        }
+
+        $result = [];
+        foreach ($statusCounts as $name => $amount) {
+            $result[] = [
+                'name' => $name,
+                'amount' => $amount
+            ];
+        }
+
+        return $result;
+    }
+
+    private function getTopProductsData($startDate, $endDate)
+    {
+        // Get top products from orders
+        $orderProducts = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('base_products', 'order_items.base_product_id', '=', 'base_products.id')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->select('base_products.name as date', DB::raw('SUM(order_items.quantity) as Pedidos'))
+            ->groupBy('base_products.id', 'base_products.name')
+            ->orderByDesc('Pedidos')
+            ->limit(10)
+            ->get();
+
+        // Get top products from sales (POS)
+        $saleProducts = DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->join('base_products', 'sale_items.product_id', '=', 'base_products.id')
+            ->whereBetween('sales.created_at', [$startDate, $endDate])
+            ->select('base_products.name as date', DB::raw('SUM(sale_items.quantity) as Ventas'))
+            ->groupBy('base_products.id', 'base_products.name')
+            ->orderByDesc('Ventas')
+            ->limit(10)
+            ->get();
+
+        return [
+            'orders' => $orderProducts->map(fn($p) => ['name' => $p->date, 'value' => $p->Pedidos])->toArray(),
+            'sales' => $saleProducts->map(fn($p) => ['name' => $p->date, 'value' => $p->Ventas])->toArray()
+        ];
+    }
+
+    private function getRecentOrdersData()
+    {
+        return Order::with(['user:id,name', 'deliveryStatus:id,name'])
+            ->select('id', 'user_id', 'delivery_status_id', 'total', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->toArray();
+    }
+
+    private function getRevenueByYearData()
+    {
+        Carbon::setLocale('es');
+        $now = Carbon::now(config('app.timezone'));
+        $currentYear = $now->year;
+        $data = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $date = Carbon::create($currentYear, $month, 1, 0, 0, 0, config('app.timezone'));
+            $startDate = $date->copy()->startOfMonth();
+            $endDate = $date->copy()->endOfMonth();
+
+            $ordersRevenue = Order::whereBetween('created_at', [$startDate, $endDate])->sum('total');
+            $salesRevenue = Sale::whereBetween('created_at', [$startDate, $endDate])->sum('total');
+            $total = $ordersRevenue + $salesRevenue;
+
+            $data[] = [
+                'date' => $date->locale('es')->format('M y'),
+                'Ganancia' => round($total, 2)
+            ];
+        }
+
+        return $data;
     }
 
     // Helper Methods

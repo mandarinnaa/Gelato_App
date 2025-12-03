@@ -67,12 +67,13 @@ class OrderController extends Controller
         $orders = $query->orderBy('created_at', 'desc')->paginate(15);
 
         // ✅ TRANSFORMAR PARA INCLUIR image_url COMPLETA
+        // ✅ TRANSFORMAR PARA INCLUIR image_url COMPLETA
         $orders->getCollection()->transform(function ($order) {
             if ($order->orderItems) {
                 $order->orderItems->transform(function ($item) {
-                    // Agregar image_url al baseProduct si existe
-                    if ($item->baseProduct && $item->baseProduct->image) {
-                        $item->baseProduct->image_url = url('storage/' . $item->baseProduct->image);
+                    // Agregar image_url al baseProduct usando el accessor del modelo
+                    if ($item->baseProduct) {
+                        $item->baseProduct->image_url = $item->baseProduct->image_url;
                     }
                     
                     // Agregar image_url al customProduct si existe
@@ -166,8 +167,8 @@ class OrderController extends Controller
             // Transformar para incluir image_url
             if ($order->orderItems) {
                 $order->orderItems->transform(function ($item) {
-                    if ($item->baseProduct && $item->baseProduct->image) {
-                        $item->baseProduct->image_url = url('storage/' . $item->baseProduct->image);
+                    if ($item->baseProduct) {
+                        $item->baseProduct->image_url = $item->baseProduct->image_url;
                     }
                     return $item;
                 });
@@ -214,8 +215,8 @@ class OrderController extends Controller
         // Transformar para incluir image_url
         if ($order->orderItems) {
             $order->orderItems->transform(function ($item) {
-                if ($item->baseProduct && $item->baseProduct->image) {
-                    $item->baseProduct->image_url = url('storage/' . $item->baseProduct->image);
+                if ($item->baseProduct) {
+                    $item->baseProduct->image_url = $item->baseProduct->image_url;
                 }
                 if ($item->customProduct && $item->customProduct->image) {
                     $item->customProduct->image_url = url('storage/' . $item->customProduct->image);

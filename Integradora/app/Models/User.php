@@ -90,7 +90,7 @@ class User extends Authenticatable implements CanResetPassword
             return $this->profile_photo;
         }
 
-        return asset('storage/' . $this->profile_photo);
+        return '/storage/' . $this->profile_photo;
     }
 
     // ========================================

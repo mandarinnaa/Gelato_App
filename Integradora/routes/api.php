@@ -262,6 +262,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // 📊 DASHBOARD ROUTES (API protegidas) - RESTRICTED TO SUPERADMIN
     // ===================================================================
     Route::prefix('dashboard')->middleware('role:superadmin')->group(function () {
+        // Dashboard routes
+        // Consolidated endpoint (OPTIMIZED) - Use this instead of individual calls
+        Route::get('/all-data', [DashboardController::class, 'getAllDashboardData']);
+        
+        // Individual endpoints (kept for backwards compatibility)
         Route::get('/stats', [DashboardController::class, 'getStats']);
         Route::get('/revenue-chart', [DashboardController::class, 'getRevenueChart']);
         Route::get('/orders-by-status', [DashboardController::class, 'getOrdersByStatus']);
