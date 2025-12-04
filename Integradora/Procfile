@@ -1,1 +1,0 @@
-web: sh startup.sh
