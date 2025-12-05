@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <base href="/react-app/" />
     <link rel="icon" href="/react-app/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
@@ -22,14 +21,14 @@
         }
     @endphp
     @if($mainCss)
-    <link href="{{ $mainCss }}" rel="stylesheet">
+    <link href="/react-app{{ $mainCss }}" rel="stylesheet">
     @endif
 </head>
 <body>
     <noscript>Necesitas habilitar JavaScript para ejecutar esta aplicación.</noscript>
     <div id="root"></div>
     @if($mainJs)
-    <script src="{{ $mainJs }}"></script>
+    <script src="/react-app{{ $mainJs }}"></script>
     @endif
 </body>
 </html>
