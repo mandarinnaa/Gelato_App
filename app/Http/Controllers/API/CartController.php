@@ -112,14 +112,16 @@ class CartController extends Controller
             ], 200);
             
         } catch (\Exception $e) {
-            Log::error('❌ Error al obtener carrito:', [
+            Log::error('🔥 Error CRÍTICO en CartController@index:', [
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cargar el carrito',
+                'message' => 'Error al cargar el carrito: ' . $e->getMessage(), // Agregamos mensaje al response para verlo en network tab si es posible
                 'data' => [
                     'cart_id' => null,
                     'items' => [],
@@ -234,14 +236,16 @@ class CartController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Error al agregar producto al carrito:', [
+            Log::error('🔥 Error CRÍTICO en CartController@addBaseProduct:', [
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Error al agregar producto al carrito',
+                'message' => 'Error al agregar producto al carrito: ' . $e->getMessage(),
                 'error' => $e->getMessage()
             ], 500);
         }

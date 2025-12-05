@@ -107,8 +107,10 @@ class BaseProductController extends Controller
                 ] : null
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Error en BaseProductController@index:', [
+            Log::error('🔥 Error CRÍTICO en BaseProductController@index:', [
                 'message' => $e->getMessage(),
+                'file' => $e->getFile(), // Agregamos archivo
+                'line' => $e->getLine(), // Agregamos línea
                 'trace' => $e->getTraceAsString()
             ]);
             
