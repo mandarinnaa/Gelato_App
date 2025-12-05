@@ -63,8 +63,15 @@ class AppServiceProvider extends ServiceProvider
 
             $bucket = $storageClient->bucket($config['bucket']);
             $adapter = new \League\Flysystem\GoogleCloudStorage\GoogleCloudStorageAdapter($bucket);
+            $filesystem = new \League\Flysystem\Filesystem($adapter);
 
-            return new \League\Flysystem\Filesystem($adapter);
+            return new class($filesystem, $adapter, $config) extends \Illuminate\Filesystem\FilesystemAdapter {
+                public function url($path)
+                {
+                    // Generar URL pública directa a Google Storage
+                    return 'https://storage.googleapis.com/' . $this->config['bucket'] . '/' . $path;
+                }
+            };
         });
     }
 }
