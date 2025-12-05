@@ -43,7 +43,7 @@ class UserController extends Controller
 
         // Manejar la subida de la foto de perfil
         if ($request->hasFile('profile_photo')) {
-            $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
+            $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos');
         }
         
         $user = User::create($data);
@@ -81,10 +81,10 @@ class UserController extends Controller
         if ($request->hasFile('profile_photo')) {
             // Eliminar la foto anterior si existe
             if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
+                Storage::disk()->delete($user->profile_photo);
             }
             
-            $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
+            $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos');
         }
         
         $user->update($data);
@@ -103,7 +103,7 @@ class UserController extends Controller
     {
         // Eliminar la foto de perfil si existe
         if ($user->profile_photo) {
-            Storage::disk('public')->delete($user->profile_photo);
+            Storage::disk()->delete($user->profile_photo);
         }
 
         $user->delete();
@@ -125,10 +125,10 @@ class UserController extends Controller
 
         // Eliminar la foto anterior si existe
         if ($user->profile_photo) {
-            Storage::disk('public')->delete($user->profile_photo);
+            Storage::disk()->delete($user->profile_photo);
         }
 
-        $path = $request->file('profile_photo')->store('profile_photos', 'public');
+        $path = $request->file('profile_photo')->store('profile_photos');
         $user->update(['profile_photo' => $path]);
 
         return response()->json([
@@ -145,7 +145,7 @@ class UserController extends Controller
     public function deleteProfilePhoto(User $user)
     {
         if ($user->profile_photo) {
-            Storage::disk('public')->delete($user->profile_photo);
+            Storage::disk()->delete($user->profile_photo);
             $user->update(['profile_photo' => null]);
         }
 

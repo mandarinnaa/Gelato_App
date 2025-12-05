@@ -12,7 +12,8 @@
         "laravel/framework": "^12.0",
         "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.2",
-        "laravel/tinker": "^2.10.1"
+        "laravel/tinker": "^2.10.1",
+        "league/flysystem-google-cloud-storage": "^3.30"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",

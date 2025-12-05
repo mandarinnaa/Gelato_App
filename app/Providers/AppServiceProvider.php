@@ -42,5 +42,29 @@ class AppServiceProvider extends ServiceProvider
             
             return ($sum % 10) == 0;
         });
+
+        // Firebase Storage Driver
+        \Illuminate\Support\Facades\Storage::extend('firebase', function ($app, $config) {
+            $storageClient = new \Google\Cloud\Storage\StorageClient([
+                'projectId' => $config['project_id'],
+                'keyFile' => [
+                    'type' => 'service_account',
+                    'project_id' => $config['project_id'],
+                    'private_key_id' => 'undefined', // No necesario para autenticación directa
+                    'private_key' => str_replace('\\n', "\n", $config['private_key']), // Fix newlines
+                    'client_email' => $config['client_email'],
+                    'client_id' => 'undefined',
+                    'auth_uri' => 'https://accounts.google.com/o/oauth2/auth',
+                    'token_uri' => 'https://oauth2.googleapis.com/token',
+                    'auth_provider_x509_cert_url' => 'https://www.googleapis.com/oauth2/v1/certs',
+                    'client_x509_cert_url' => 'https://www.googleapis.com/robot/v1/metadata/x509/' . urlencode($config['client_email']),
+                ],
+            ]);
+
+            $bucket = $storageClient->bucket($config['bucket']);
+            $adapter = new \League\Flysystem\GoogleCloudStorage\GoogleCloudStorageAdapter($bucket);
+
+            return new \League\Flysystem\Filesystem($adapter);
+        });
     }
 }

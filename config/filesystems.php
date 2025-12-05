@@ -60,6 +60,15 @@ return [
             'report' => false,
         ],
 
+        'firebase' => [
+            'driver' => 'firebase',
+            'project_id' => env('FIREBASE_PROJECT_ID'),
+            'private_key' => env('FIREBASE_PRIVATE_KEY'),
+            'client_email' => env('FIREBASE_CLIENT_EMAIL'),
+            'bucket' => env('FIREBASE_BUCKET', env('FIREBASE_PROJECT_ID') . '.appspot.com'),
+            'throw' => false,
+        ],
+
     ],
 
     /*

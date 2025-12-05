@@ -191,7 +191,7 @@ class BaseProductController extends Controller
                 $images = $request->file('images');
                 
                 foreach ($images as $index => $image) {
-                    $imagePath = $image->store('products', 'public');
+                    $imagePath = $image->store('products');
                     
                     BaseProductImage::create([
                         'base_product_id' => $product->id,
@@ -282,7 +282,7 @@ class BaseProductController extends Controller
                     ->get();
                 
                 foreach ($imagesToDelete as $imageRecord) {
-                    Storage::disk('public')->delete($imageRecord->image_path);
+                    Storage::disk()->delete($imageRecord->image_path);
                     $imageRecord->delete();
                 }
             }
@@ -299,7 +299,7 @@ class BaseProductController extends Controller
                 }
                 
                 foreach ($images as $index => $image) {
-                    $imagePath = $image->store('products', 'public');
+                    $imagePath = $image->store('products');
                     
                     BaseProductImage::create([
                         'base_product_id' => $product->id,
@@ -351,13 +351,13 @@ class BaseProductController extends Controller
 
             // Eliminar todas las imágenes
             foreach ($product->images as $image) {
-                Storage::disk('public')->delete($image->image_path);
+                Storage::disk()->delete($image->image_path);
                 $image->delete();
             }
             
             // Eliminar imagen antigua si existe
             if ($product->image) {
-                Storage::disk('public')->delete($product->image);
+                Storage::disk()->delete($product->image);
             }
             
             $product->delete();
