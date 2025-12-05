@@ -1,10 +1,10 @@
 {
     "private": true,
     "type": "module",
-    "scripts": {
-        "build": "vite build",
-        "dev": "vite"
-    },
+   "scripts": {
+    "build": "echo 'No build needed'",
+    "dev": "vite"
+},
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
         "@tailwindcss/vite": "^4.0.0",

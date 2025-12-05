@@ -1,8 +1,9 @@
 /.phpunit.cache
 /node_modules
-/public/build
+/public/build/assets
 /public/hot
 /public/storage
+!/public/react-app
 /storage/*.key
 /storage/pail
 /vendor
