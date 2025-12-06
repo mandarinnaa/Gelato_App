@@ -1,0 +1,13 @@
+[phases.setup]
+nixPkgs = ["php", "phpPackages.composer", "nodejs", "nginx", "libmysqlclient"]
+aptPkgs = ["supervisor"]
+
+[phases.build]
+cmds = [
+    "mkdir -p /var/log/nginx",
+    "mkdir -p /var/cache/nginx",
+    "composer install --no-dev --optimize-autoloader",
+    "php artisan config:cache",
+    "php artisan route:cache",
+    "php artisan view:cache"
+]

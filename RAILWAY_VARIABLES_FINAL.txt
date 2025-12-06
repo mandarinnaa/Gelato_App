@@ -1,0 +1,101 @@
+# Variables para el servicio Gelato_App en Railway
+# Copia SOLO estas variables en tu servicio Gelato_App
+
+# ============================================
+# APLICACIÓN
+# ============================================
+APP_NAME=GELATO
+APP_ENV=production
+APP_KEY=base64:cSVdY1ja0WsOiQRb+VBdSvYCsNA4/Ixj6gS5zHBiMNQ=
+APP_DEBUG=false
+APP_URL=https://gelatoapp-production.up.railway.app
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+
+# ============================================
+# BASE DE DATOS - CONECTA CON EL SERVICIO MySQL
+# ============================================
+DB_CONNECTION=mysql
+DB_HOST=${{MySQL.MYSQLHOST}}
+DB_PORT=${{MySQL.MYSQLPORT}}
+DB_DATABASE=${{MySQL.MYSQLDATABASE}}
+DB_USERNAME=${{MySQL.MYSQLUSER}}
+DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
+
+# ============================================
+# LOGGING
+# ============================================
+LOG_CHANNEL=stack
+LOG_LEVEL=error
+
+# ============================================
+# SESIÓN
+# ============================================
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_DOMAIN=gelatoapp-production.up.railway.app
+
+# ============================================
+# BROADCASTING & REVERB
+# ============================================
+BROADCAST_CONNECTION=reverb
+REVERB_APP_ID=887558
+REVERB_APP_KEY=bgzcymqswrd5dunafh0b
+REVERB_APP_SECRET=gtlzqory0rpvqb0utfo3
+REVERB_HOST=gelatoapp-production.up.railway.app
+REVERB_PORT=443
+REVERB_SCHEME=https
+
+VITE_REVERB_APP_KEY=bgzcymqswrd5dunafh0b
+VITE_REVERB_HOST=gelatoapp-production.up.railway.app
+VITE_REVERB_PORT=443
+VITE_REVERB_SCHEME=https
+
+# ============================================
+# STORAGE & QUEUE
+# ============================================
+FILESYSTEM_DISK=public
+QUEUE_CONNECTION=database
+CACHE_STORE=database
+
+# ============================================
+# PAYPAL
+# ============================================
+PAYPAL_MODE=sandbox
+PAYPAL_SANDBOX_CLIENT_ID=AWGGG3nb1hYEbagOrih6dPCbRrH7d4rWGJsuAQhjzkXIWxVEHoqucqDoc_sUJelW2iUHelDyhd2z9qkf
+PAYPAL_SANDBOX_SECRET=ECa-TiDSCnOLk9cZgWQ_9UaMflr87ThjssNAhDVlnmsNzBi1uIR4GR7188Uf8PQpcFnAy8C-1Yzq54RG
+
+# ============================================
+# MAIL
+# ============================================
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=gelatopasteleria@gmail.com
+MAIL_PASSWORD=kyak urfa fdqz ijuv
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=gelatopasteleria@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+# ============================================
+# FIREBASE
+# ============================================
+FIREBASE_PROJECT_ID=pasteles-84398
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@pasteles-84398.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQClaztkMO2YZwyz\ntwD1vJDf4ymylmV4NZ1V4okQIPf1koPBaGk5sDigJRSNJSYlzu4CQ5e+5n36NZx9\nvcntzlBWNZZ+U27Bbx0yfM2Q1k20asCmy0Dg3fEIdFtl8nb8VnHSdqQ0OJR3J6Zv\n8FopoJ3EVCGcP1NydXdYL+bG0/nNyT8vKbjbHhMqzynhbsgTvUVaVXvGFXQQP8L+\n0+wrX3/U55U2wqrEeGPuzcNQHvidWfFAcEv78nn2F+dG0HhKqJHbzFAaGzw9R05x\nzm7VF8oYiHXOBrKS22ul8gDC7e/1ZByoZ4t4KgFsR5aE8/sxrjKP0M+GKKJBLMpe\n9l6BHWBNAgMBAAECggEAJQUxnoOguOnfGt1K9rQDzEdfjptADD4bfxwaxqRKOghX\nOlKusf1xPs3tooT825tLAvCzpkKZUQTsh+uQpIr2ycRmcNElSV8frqvlqZN8gnMd\nuHZmh6zEA7tetRsla+XAxXRN3W4IM/6IriahVw2eIVEe0IQPnd8SHYdi436POnGB\n4R5WDQpb2HZ1wKKyVLc5wd0lIMiN4KUIF9oytrLh/awjoRa0WFPrsM+GfD1CRVSK\njBWPyGGszUF0ccDRXec9DQ78wjAjF3+YUP6HZZnwzSz2hMI0zxsyBNFJz6E1Cs1I\nuQLZCg/gz+0bd5tKEtCJxgB5Aliq50EUsC13cNqtAQKBgQDmjBZIv0E8mPqBc+cn\nE4tBCckvvqusS/uECD72fkwbXu0aYUMwdS6XGu1LHKAbbQGw8ei7OHhWQeZ0ixUT\nF/VonIGCPnaPT1AVlClCvs/4Gm84h+35j9bHJsXKN8cxAWHaWDp0WNGnyOe4qpnC\nwmOStEEebS/AN6YZ6uiNFzzGDQKBgQC3rm9QSInCJsL5HeDxP2wLLCzgE4gshqev\n0uIP7c2C7RVRrFFbOStTKNKJNKJxsieOZzUzoRWeKdRjTNvSsVqibRvSHR2XzIdu\neYNxqDD7tLm313obYL8wuSHwZZJ/AEGFa1MoLT10m7aowy10xZvqZRh/SVxZjBDk\naOpgFASzQQKBgQCsG/Zi1oyADYAtdfYhYOC7a+/KeeA1HwAj//fpEj4EzOfaorOD\nEGf4nDx7r2IDN2xkySNB6RVE56uAY3gXKfKl5vhz3+eocsBJa7MlxccB49IV9Lv+\na5geUl6j6OIGPo7rbqQsyUWyqTP70zg4gd/N3E0kxsQ4DhMtFAYJlkhjXQKBgBWN\niE45VMDNX49vrBdiw8DD3Dgm0pG28zI0YoZP9w9n1lqRB7LWkHjfj2S+IlmI+A9D\nmQCH5Et8yQkl2Z1tZh8tAlizReer/jA+XegWPjkqyagCxrczsPt8nbjhkkEIvKd1\nInrSZCWsp9BBprHPBi6I0kkNSKLRRqImlWnUr4CBAoGBAIX3j4+CbDkBjyN866JM\nVoghQmq0eQ0+cbBPrR0CTyy4Up+tC7BQgnzR7J7iwcJbC9kVTRFSCpY07fhn2ScB\nxhzB/Yq5JXDbtzTLcfrrrSYq7m3FL5vHtYgU7ZCivoxa1EiAbvb5/d+tufnRwF4O\nzO+GQfdcGkBqaRfZCFRaYHdY\n-----END PRIVATE KEY-----\n"
+
+# ============================================
+# FRONTEND
+# ============================================
+FRONTEND_URL=https://gelatoapp-production.up.railway.app
+
+# ============================================
+# SANCTUM
+# ============================================
+SANCTUM_STATEFUL_DOMAINS=gelatoapp-production.up.railway.app
+
+# ============================================
+# VITE
+# ============================================
+VITE_APP_NAME="${APP_NAME}"
