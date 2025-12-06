@@ -37,14 +37,20 @@ const ChatModal = ({ order, visible, onClose }) => {
         if (visible && order) {
             loadMessages();
             setupEcho();
-        }
 
-        return () => {
-            if (echoRef.current) {
-                echoRef.current.leaveChannel(`private-order.${order?.id}`);
-                echoRef.current.disconnect();
-            }
-        };
+            // Polling fallback
+            const intervalId = setInterval(() => {
+                loadMessages(true);
+            }, 3000);
+
+            return () => {
+                clearInterval(intervalId);
+                if (echoRef.current) {
+                    echoRef.current.leaveChannel(`private-order.${order.id}`);
+                    echoRef.current.disconnect();
+                }
+            };
+        }
     }, [visible, order]);
 
     const setupEcho = () => {
@@ -83,16 +89,24 @@ const ChatModal = ({ order, visible, onClose }) => {
         }
     };
 
-    const loadMessages = async () => {
+    const loadMessages = async (silent = false) => {
         try {
-            setLoading(true);
+            if (!silent) setLoading(true);
             const data = await messageService.getMessages(order.id);
-            setMessages(data || []);
-            setTimeout(scrollToBottom, 100);
+
+            setMessages((prev) => {
+                if (!data) return prev;
+                // Merge with temp messages
+                const serverIds = new Set(data.map(m => m.id));
+                const localTemp = prev.filter(m => typeof m.id === 'number' && m.id > 1700000000000 && !serverIds.has(m.id));
+                return [...data, ...localTemp];
+            });
+
+            if (!silent) setTimeout(scrollToBottom, 100);
         } catch (error) {
             console.error('Error loading messages:', error);
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 

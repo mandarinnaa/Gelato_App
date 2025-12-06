@@ -31,7 +31,13 @@ const ChatModal = ({ order, onClose }) => {
         loadMessages();
         setupEcho();
 
+        // Polling fallback: Fetch every 3 seconds to ensure sync
+        const intervalId = setInterval(() => {
+            loadMessages(true);
+        }, 3000);
+
         return () => {
+            clearInterval(intervalId);
             if (echoRef.current) {
                 echoRef.current.leaveChannel(`private-order.${order.id}`);
                 echoRef.current.disconnect();
@@ -71,15 +77,30 @@ const ChatModal = ({ order, onClose }) => {
         }
     };
 
-    const loadMessages = async () => {
+    const loadMessages = async (silent = false) => {
         try {
-            setLoading(true);
+            if (!silent) setLoading(true);
             const data = await messageService.getMessages(order.id);
-            setMessages(data || []);
+            setMessages((prev) => {
+                // Merge strategies could call for checking duplicates, but simplistic replacement is often safer for sync
+                // However, replacing disrupts optimistic updates if not careful.
+                // Let's do a smart merge: Keep existing IF they are optimistic (id is timestamp), replace others?
+                // Actually, simply replacing strict server data is "True Sync".
+                // But we don't want to lose our temp message if it hasn't ack'd yet.
+                // Solution: Combine server messages with any local temp messages that aren't in server list yet.
+
+                if (!data) return prev;
+
+                // If we have temp messages (id > 1000000000000 usually), keep them if not in data
+                const serverIds = new Set(data.map(m => m.id));
+                const localTemp = prev.filter(m => typeof m.id === 'number' && m.id > 1700000000000 && !serverIds.has(m.id));
+
+                return [...data, ...localTemp];
+            });
         } catch (error) {
             console.error('Error loading messages:', error);
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
