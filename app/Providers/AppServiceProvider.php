@@ -65,11 +65,25 @@ class AppServiceProvider extends ServiceProvider
             $adapter = new \League\Flysystem\GoogleCloudStorage\GoogleCloudStorageAdapter($bucket);
             $filesystem = new \League\Flysystem\Filesystem($adapter);
 
-            return new class($filesystem, $adapter, $config) extends \Illuminate\Filesystem\FilesystemAdapter {
+            return new class($filesystem, $adapter, $config, $bucket) extends \Illuminate\Filesystem\FilesystemAdapter {
+                protected $bucket;
+
+                public function __construct($driver, $adapter, $config, $bucket)
+                {
+                    parent::__construct($driver, $adapter, $config);
+                    $this->bucket = $bucket;
+                }
+
                 public function url($path)
                 {
-                    // Generar URL pública directa a Google Storage
-                    return 'https://storage.googleapis.com/' . $this->config['bucket'] . '/' . $path;
+                    // Generar URL firmada válida por 2 horas para evitar problemas de permisos públicos
+                    // Nota: No verificamos existe() para rendimiento.
+                    try {
+                        return $this->bucket->object($path)->signedUrl(new \DateTime('+2 hours'));
+                    } catch (\Exception $e) {
+                        // Fallback en caso de error de firma
+                        return 'https://storage.googleapis.com/' . $this->config['bucket'] . '/' . $path;
+                    }
                 }
             };
         });
