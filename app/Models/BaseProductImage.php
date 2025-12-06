@@ -36,6 +36,6 @@ class BaseProductImage extends Model
      */
     public function getImageUrlAttribute(): string
     {
-        return Storage::url($this->image_path);
+        return Storage::disk('public')->url($this->image_path);
     }
 }
