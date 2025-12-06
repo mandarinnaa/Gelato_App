@@ -1,5 +1,6 @@
 [phases.setup]
-nixPkgs = ["nginx", "supervisor"]
+nixPkgs = ["nginx"]
+aptPkgs = ["supervisor"]
 
 [phases.build]
 cmds = [
