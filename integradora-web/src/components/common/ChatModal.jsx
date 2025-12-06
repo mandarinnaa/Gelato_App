@@ -89,8 +89,13 @@ const ChatModal = ({ order, onClose }) => {
 
         try {
             setSending(true);
-            await messageService.sendMessage(order.id, newMessage.trim());
+            const sentMessage = await messageService.sendMessage(order.id, newMessage.trim());
+            setMessages((prev) => {
+                if (prev.some(m => m.id === sentMessage.id)) return prev;
+                return [...prev, sentMessage];
+            });
             setNewMessage('');
+            scrollToBottom();
         } catch (error) {
             console.error('Error sending message:', error);
             setErrorMessage('Error al enviar el mensaje');
