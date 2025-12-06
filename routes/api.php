@@ -322,23 +322,3 @@ Route::middleware('auth:sanctum')->group(function () {
 use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
-
-// DEBUG ROUTE - REMOVE AFTER FIXING
-Route::get('/debug-storage', function () {
-    try {
-        $url = \Illuminate\Support\Facades\Storage::disk('firebase')->url('test-image.jpg');
-        return response()->json([
-            'success' => true,
-            'url' => $url,
-            'config_bucket' => config('filesystems.disks.firebase.bucket'),
-            'project_id' => config('filesystems.disks.firebase.project_id'),
-            // 'key_preview' => substr(config('filesystems.disks.firebase.private_key'), 0, 50) . '...' // SOLO PARA DEBUG
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
-    }
-});
