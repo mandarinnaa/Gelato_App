@@ -99,16 +99,28 @@ const ChatModal = ({ order, visible, onClose }) => {
     const handleSendMessage = async () => {
         if (!newMessage.trim() || sending) return;
 
+        setSending(true);
+
+        // Optimistic update
+        const tempId = Date.now();
+        const tempMessage = {
+            id: tempId,
+            content: newMessage.trim(),
+            sender_id: user.id,
+            created_at: new Date().toISOString(),
+            sender: user
+        };
+
+        setMessages((prev) => [...prev, tempMessage]);
+        setNewMessage('');
+        setTimeout(scrollToBottom, 50);
+
         try {
-            setSending(true);
-            const message = await messageService.sendMessage(order.id, newMessage.trim());
-            setMessages((prev) => {
-                if (prev.some(m => m.id === message.id)) return prev;
-                return [...prev, message];
-            });
-            setNewMessage('');
+            const message = await messageService.sendMessage(order.id, tempMessage.content);
+            setMessages((prev) => prev.map(m => m.id === tempId ? message : m));
         } catch (error) {
             console.error('Error sending message:', error);
+            setMessages((prev) => prev.filter(m => m.id !== tempId));
         } finally {
             setSending(false);
         }
